@@ -1,0 +1,29 @@
+{
+  "name": "product-monitor-frontend",
+  "version": "2.0.0",
+  "description": "商品监控系统前端 - 极简黑白设计",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 3000",
+    "build": "echo 'Static site - no build needed'",
+    "preview": "python -m http.server 4173"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/product-monitor-frontend.git"
+  },
+  "keywords": [
+    "product-monitoring",
+    "inventory-tracking",
+    "amazon",
+    "louis-vuitton",
+    "ecommerce"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "node": ">=16"
+  }
+}

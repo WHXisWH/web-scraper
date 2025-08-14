@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品监控</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ 商品监控</h1>
+        </div>
+        
+        <div class="form-section">
+            <div class="input-group">
+                <input type="text" id="keyword" placeholder="输入商品关键词...">
+            </div>
+            
+            <div class="sites-section">
+                <div class="sites-grid">
+                    <div class="site-option">
+                        <input type="checkbox" id="amazon" value="amazon.co.jp" class="site-checkbox" checked>
+                        <label for="amazon" class="site-label">Amazon</label>
+                    </div>
+                    <div class="site-option">
+                        <input type="checkbox" id="lv" value="louisvuitton.com" class="site-checkbox" checked>
+                        <label for="lv" class="site-label">Louis Vuitton</label>
+                    </div>
+                    <div class="site-option">
+                        <input type="checkbox" id="rakuten" value="rakuten.co.jp" class="site-checkbox">
+                        <label for="rakuten" class="site-label">楽天</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <input type="email" id="email" placeholder="通知邮箱...">
+            </div>
+            
+            <button class="main-button" id="startBtn" onclick="startMonitoring()">
+                开始监控
+            </button>
+        </div>
+        
+        <div id="statusArea" class="status-area">
+            <div id="statusText"></div>
+            <div id="resultsList" class="results-list"></div>
+        </div>
+        
+        <div class="monitor-list">
+            <div class="monitor-header">监控列表</div>
+            <div id="monitorList">
+                <div class="empty-state">暂无监控任务</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🚀 前端托管在 <a href="https://vercel.com" target="_blank">Vercel</a> | 后端部署在 <a href="https://railway.app" target="_blank">Railway</a></p>
+        </div>
+    </div>
+    
+    <script src="src/app.js"></script>
+</body>
+</html>

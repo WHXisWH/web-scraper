@@ -6,9 +6,8 @@ import logging
 import os
 
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 
@@ -28,7 +27,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 启动时
-    logger.info("正在启动商品监控系统...")
+    logger.info("正在启动商品监控API服务...")
     
     # 启动监控调度器
     monitor_scheduler.start()
@@ -37,29 +36,44 @@ async def lifespan(app: FastAPI):
     yield
     
     # 关闭时
-    logger.info("正在关闭商品监控系统...")
+    logger.info("正在关闭商品监控API服务...")
     monitor_scheduler.stop()
     logger.info("监控调度器已停止")
 
 # 创建目录
 ROOT_DIR = Path(__file__).resolve().parent
-templates_dir = ROOT_DIR / "templates"
-static_dir = ROOT_DIR / "static"
 data_dir = ROOT_DIR / "data"
-
-for d in (templates_dir, static_dir, data_dir):
-    d.mkdir(exist_ok=True)
+data_dir.mkdir(exist_ok=True)
 
 # 创建FastAPI应用
 app = FastAPI(
-    title="商品监控系统",
+    title="商品监控API",
     version="2.0.0",
-    description="智能商品库存监控与邮件通知系统",
-    lifespan=lifespan
+    description="商品库存监控与邮件通知API服务",
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
-templates = Jinja2Templates(directory=templates_dir)
+# 配置CORS - 允许前端域名访问
+origins = [
+    "http://localhost:3000",  # 本地开发
+    "http://localhost:5173",  # Vite开发服务器
+    "https://*.vercel.app",   # Vercel部署域名
+    "https://your-frontend-domain.vercel.app",  # 替换为实际前端域名
+]
+
+# 生产环境可以根据环境变量动态设置
+if os.getenv("FRONTEND_URL"):
+    origins.append(os.getenv("FRONTEND_URL"))
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins if os.getenv("ENVIRONMENT") != "development" else ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # API数据模型
 class MonitorRequest(BaseModel):
@@ -83,19 +97,24 @@ class ProductCheckResponse(BaseModel):
     price: Optional[float]
     check_time: datetime
 
-# 路由处理器
-@app.get("/", response_class=HTMLResponse)
-def read_root(request: Request):
-    """主页"""
-    try:
-        index_html = templates_dir / "index.html"
-        if index_html.exists():
-            return templates.TemplateResponse("index.html", {"request": request})
-        else:
-            raise HTTPException(status_code=404, detail="模板文件未找到")
-    except Exception as e:
-        logger.error(f"主页加载失败: {str(e)}")
-        raise HTTPException(status_code=500, detail="页面加载失败")
+# 根路径返回API信息
+@app.get("/")
+def api_root():
+    """API根路径"""
+    return {
+        "name": "商品监控API",
+        "version": "2.0.0",
+        "status": "running",
+        "docs": "/docs",
+        "endpoints": {
+            "add_monitor": "POST /api/add-monitor",
+            "get_monitors": "GET /api/monitors",
+            "delete_monitor": "DELETE /api/monitors/{task_id}",
+            "get_task_checks": "GET /api/monitors/{task_id}/checks",
+            "system_status": "GET /api/system/status",
+            "test_email": "POST /api/system/test-email"
+        }
+    }
 
 @app.post("/api/add-monitor")
 def add_monitor(req: MonitorRequest, background_tasks: BackgroundTasks):
@@ -134,7 +153,8 @@ def add_monitor(req: MonitorRequest, background_tasks: BackgroundTasks):
             "task_id": task.id,
             "keyword": req.keyword,
             "summary": f"已添加监控任务，将在后台持续监控",
-            "timestamp": datetime.now().timestamp()
+            "timestamp": datetime.now().timestamp(),
+            "results": []  # 首次检查结果将在后台执行
         }
         
     except Exception as e:
@@ -152,7 +172,7 @@ def perform_initial_check(task_id: int, keyword: str, target_sites: List[str], n
             keyword=keyword,
             target_sites=target_sites,
             notification_email=notification_email,
-            task_id=task_id  # 传递task_id用于数据库记录
+            task_id=task_id
         )
         
         logger.info(f"首次检查完成: 任务ID={task_id}, 结果={result.get('status')}")
@@ -205,7 +225,7 @@ def get_task_checks(task_id: int, limit: int = 20):
         if not task:
             raise HTTPException(status_code=404, detail="监控任务未找到")
         
-        # 获取检查记录（限制数量）
+        # 获取检查记录
         session = db_manager.get_session()
         try:
             from backend_logic.database import ProductCheck
@@ -247,6 +267,7 @@ def get_system_status():
             "email_configured": email_configured,
             "active_tasks_count": len(active_tasks),
             "version": "2.0.0",
+            "environment": os.getenv("ENVIRONMENT", "production"),
             "features": {
                 "database_storage": True,
                 "email_notifications": email_configured,
@@ -263,9 +284,13 @@ def get_system_status():
         }
 
 @app.post("/api/system/test-email")
-def test_email(email: str):
+def test_email(request: dict):
     """测试邮件发送"""
     try:
+        email = request.get("email")
+        if not email:
+            raise HTTPException(status_code=400, detail="邮箱地址不能为空")
+            
         if not email_service.is_configured():
             raise HTTPException(status_code=503, detail="邮件服务未配置")
         
@@ -291,16 +316,15 @@ def test_email(email: str):
         logger.error(f"测试邮件发送失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"邮件发送失败: {str(e)}")
 
-# 调试和健康检查端点
-@app.get("/debug/status")
-def debug_status():
-    """调试状态信息（兼容旧版本）"""
-    return get_system_status()
-
+# 健康检查
 @app.get("/health")
 def health_check():
     """健康检查"""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    return {
+        "status": "healthy", 
+        "timestamp": datetime.now().isoformat(),
+        "service": "product-monitor-api"
+    }
 
 # 异常处理器
 @app.exception_handler(500)
@@ -318,6 +342,6 @@ if __name__ == "__main__":
         "app:app", 
         host="0.0.0.0", 
         port=port, 
-        reload=True,
+        reload=os.getenv("ENVIRONMENT") == "development",
         log_level="info"
     )

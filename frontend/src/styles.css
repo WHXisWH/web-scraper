@@ -1,0 +1,315 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0a0a;
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    max-width: 480px;
+    width: 100%;
+    padding: 40px 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #ffffff;
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+input[type="text"], input[type="email"] {
+    width: 100%;
+    padding: 16px;
+    background: #1a1a1a;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input[type="text"]:focus, input[type="email"]:focus {
+    border-color: #ffffff;
+}
+
+input::placeholder {
+    color: #666666;
+}
+
+.sites-section {
+    margin-bottom: 20px;
+}
+
+.sites-grid {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.site-option {
+    flex: 1;
+    position: relative;
+}
+
+.site-checkbox {
+    display: none;
+}
+
+.site-label {
+    display: block;
+    padding: 12px 8px;
+    background: #1a1a1a;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.site-checkbox:checked + .site-label {
+    background: #ffffff;
+    color: #0a0a0a;
+    border-color: #ffffff;
+}
+
+.main-button {
+    width: 100%;
+    padding: 18px;
+    background: #ffffff;
+    color: #0a0a0a;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.main-button:hover {
+    background: #e0e0e0;
+}
+
+.main-button:disabled {
+    background: #333333;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+.status-area {
+    margin-top: 30px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333333;
+    display: none;
+}
+
+.status-area.visible {
+    display: block;
+}
+
+.status-loading {
+    color: #ffffff;
+    text-align: center;
+}
+
+.status-success {
+    color: #00ff88;
+}
+
+.status-error {
+    color: #ff4444;
+}
+
+.results-list {
+    margin-top: 20px;
+}
+
+.result-item {
+    padding: 16px;
+    background: #111111;
+    border: 1px solid #222222;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.result-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.result-url {
+    color: #888888;
+    font-size: 14px;
+    margin-bottom: 8px;
+    word-break: break-all;
+}
+
+.result-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.status-available {
+    background: #00ff88;
+    color: #0a0a0a;
+}
+
+.status-unavailable {
+    background: #ff4444;
+    color: #ffffff;
+}
+
+.status-unknown {
+    background: #333333;
+    color: #ffffff;
+}
+
+.monitor-list {
+    margin-top: 40px;
+    padding: 20px;
+    background: #1a1a1a;
+    border: 1px solid #333333;
+    border-radius: 8px;
+}
+
+.monitor-header {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.monitor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #333333;
+}
+
+.monitor-item:last-child {
+    border-bottom: none;
+}
+
+.monitor-keyword {
+    font-weight: 500;
+}
+
+.monitor-time {
+    color: #666666;
+    font-size: 13px;
+}
+
+.delete-btn {
+    background: #ff4444;
+    color: #ffffff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.delete-btn:hover {
+    background: #ff6666;
+}
+
+.empty-state {
+    text-align: center;
+    color: #666666;
+    padding: 20px;
+}
+
+.footer {
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid #333333;
+}
+
+.footer p {
+    color: #666666;
+    font-size: 14px;
+}
+
+.footer a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* API状态指示器 */
+.api-status {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.api-status.online {
+    background: #00ff88;
+    color: #0a0a0a;
+}
+
+.api-status.offline {
+    background: #ff4444;
+    color: #ffffff;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px 16px;
+    }
+    
+    .sites-grid {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .footer {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        background: #0a0a0a;
+        border-top: 1px solid #333333;
+        margin-top: 0;
+    }
+}
